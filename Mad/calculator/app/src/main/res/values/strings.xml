@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Calculator</string>
+
+    <string name="first_number">First number</string>
+    <string name="second_number">Second number</string>
+
+    <string name="add">+</string>
+    <string name="sub">-</string>
+    <string name="mul">×</string>
+    <string name="div">÷</string>
+
+    <string name="result">Result:</string>
+    <string name="result_value">Result: %1$.2f</string>
+</resources>

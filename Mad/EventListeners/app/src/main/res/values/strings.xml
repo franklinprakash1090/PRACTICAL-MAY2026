@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">EventListeners</string>
+    <string name="event_handling">Event Handling</string>
+    <string name="welcome_to_android">Welcome to Android</string>
+    <string name="small_font">Small Font</string>
+    <string name="large_font">Large Font</string>
+    <string name="image_description">Android Logo</string>
+    <string name="hello_world">Hello World!</string>
+</resources>

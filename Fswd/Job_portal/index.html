@@ -1,0 +1,136 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+    <title>Job Portal</title> 
+    <style> 
+        body { 
+            font-family: Arial; 
+            background-color: #f4f6f9; 
+            padding: 20px; 
+        } 
+        h1 { 
+            text-align: center; 
+        } 
+        .container { 
+            width: 80%; 
+            margin: auto; 
+        } 
+        .card { 
+            background: white; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 8px; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+        } 
+        input, textarea { 
+            width: 100%; 
+            padding: 8px; 
+            margin: 5px 0; 
+        } 
+        button { 
+            padding: 8px 12px; 
+            background-color: #0d6efd; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 5px; 
+        } 
+        button:hover { 
+            background-color: #0b5ed7; 
+        } 
+    </style> 
+</head> 
+<body> 
+<h1>Job Portal System</h1> 
+<div class="container"> 
+    <!-- Recruiter Panel --> 
+    <div class="card"> 
+        <h2>Recruiter - Post a Job</h2> 
+        <input type="text" id="jobTitle" placeholder="Job Title" required> 
+        <input type="text" id="companyName" placeholder="Company Name" 
+required> 
+        <input type="text" id="location" placeholder="Location" required> 
+        <textarea id="description" placeholder="Job Description"></textarea> 
+        <button onclick="postJob()">Post Job</button> 
+    </div> 
+    <!-- Search Section --> 
+    <div class="card"> 
+        <h2>Search Jobs</h2> 
+        <input type="text" id="searchInput" placeholder="Search by title or 
+location"> 
+        <button onclick="searchJobs()">Search</button> 
+    </div> 
+    <!-- Job Listings --> 
+    <div class="card"> 
+        <h2>Available Jobs</h2> 
+        <div id="jobList"></div> 
+    </div> 
+ 
+    <!-- Resume Upload --> 
+    <div class="card"> 
+        <h2>Upload Resume</h2> 
+        <input type="file" id="resumeUpload"> 
+    </div> 
+</div> 
+<script> 
+    let jobs = []; 
+    function postJob() { 
+        let title = document.getElementById("jobTitle").value; 
+        let company = document.getElementById("companyName").value; 
+        let location = document.getElementById("location").value; 
+        let description = document.getElementById("description").value; 
+        if (title === "" || company === "" || location === "") { 
+            alert("Please fill all required fields!"); 
+            return; 
+        } 
+        let job = { title, company, location, description }; 
+        jobs.push(job); 
+        displayJobs(jobs); 
+        document.getElementById("jobTitle").value = ""; 
+        document.getElementById("companyName").value = ""; 
+        document.getElementById("location").value = ""; 
+        document.getElementById("description").value = ""; 
+    } 
+ 
+    function displayJobs(jobArray) { 
+        let jobList = document.getElementById("jobList"); 
+        jobList.innerHTML = ""; 
+ 
+        jobArray.forEach((job, index) => { 
+            jobList.innerHTML += ` 
+                <div class="card"> 
+                    <h3>${job.title}</h3> 
+                    <p><strong>Company:</strong> ${job.company}</p> 
+                    <p><strong>Location:</strong> ${job.location}</p> 
+                    <p>${job.description}</p> 
+                    <button onclick="applyJob(${index})">Apply</button> 
+                </div> 
+            `; 
+        }); 
+    } 
+ 
+    function searchJobs() { 
+        let searchValue = 
+document.getElementById("searchInput").value.toLowerCase(); 
+ 
+        let filteredJobs = jobs.filter(job => 
+            job.title.toLowerCase().includes(searchValue) || 
+            job.location.toLowerCase().includes(searchValue) 
+        ); 
+ 
+        displayJobs(filteredJobs); 
+    } 
+ 
+    function applyJob(index) { 
+        let resume = document.getElementById("resumeUpload").value; 
+ 
+        if (resume === "") { 
+            alert("Please upload your resume before applying!"); 
+        } else { 
+            alert("Application submitted successfully for " + jobs[index].title); 
+        } 
+    } 
+</script> 
+ 
+</body> 
+</html

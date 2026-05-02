@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">FirebaseNotify</string>
+    <string name="hint_phone">Enter Phone Number</string>
+    <string name="hint_message">Enter Message</string>
+    <string name="btn_sms">Send SMS</string>
+    <string name="btn_email">Send Email</string>
+</resources>

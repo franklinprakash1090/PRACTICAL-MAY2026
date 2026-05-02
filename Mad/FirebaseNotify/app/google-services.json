@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "238520189830",
+    "project_id": "fir-notify-mad",
+    "storage_bucket": "fir-notify-mad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:238520189830:android:b0b7828646bfd975f1e207",
+        "android_client_info": {
+          "package_name": "com.mad.firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsOmqJ-Pvos4sNb7tAcWaak2v1n1gKrxw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

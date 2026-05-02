@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">filenotify</string>
+    <string name="hint_enter_text">Enter text</string>
+    <string name="btn_write">Write File</string>
+    <string name="btn_read">Read File</string>
+    <string name="btn_notify">Persistent Notification</string>
+    <string name="btn_delayed">Time-based Notification</string>
+</resources>

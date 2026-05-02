@@ -17,6 +17,10 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -48,24 +52,69 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
+        enableUserLocation();
+    }
 
+    private void enableUserLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             return;
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 3);
+            }
+        }
+
         mMap.setMyLocationEnabled(true);
         fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
             if (location != null) {
-                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                mMap.addMarker(new MarkerOptions().position(userLocation).title("You are here"));
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
-                addGeofence(userLocation);
+                updateMapWithLocation(location);
+            } else {
+                requestNewLocationData();
             }
         });
     }
 
+    private void requestNewLocationData() {
+        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
+                .setMinUpdateIntervalMillis(500)
+                .setMaxUpdates(1)
+                .build();
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                updateMapWithLocation(locationResult.getLastLocation());
+            }
+        }, getMainLooper());
+    }
+
+    private void updateMapWithLocation(android.location.Location location) {
+        if (location != null) {
+            LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+            mMap.addMarker(new MarkerOptions().position(userLocation).title("You are here"));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
+            addGeofence(userLocation);
+        }
+    }
+
     private void addGeofence(LatLng latLng) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 2);
+                return;
+            }
+        }
+
         Geofence geofence = new Geofence.Builder()
                 .setRequestId("MyGeofence")
                 .setCircularRegion(latLng.latitude, latLng.longitude, 200)
@@ -85,11 +134,30 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, flags);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
+        try {
+            geofencingClient.addGeofences(request, pendingIntent)
+                    .addOnSuccessListener(aVoid -> Toast.makeText(MainActivity.this, "Geofence Added", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> Toast.makeText(MainActivity.this, "Failed to add Geofence: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        } catch (SecurityException e) {
+            Toast.makeText(this, "SecurityException: Geofence requires Background Location permission", Toast.LENGTH_LONG).show();
         }
-        geofencingClient.addGeofences(request, pendingIntent)
-                .addOnSuccessListener(aVoid -> Toast.makeText(MainActivity.this, "Geofence Added", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(MainActivity.this, "Failed to add Geofence: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                enableUserLocation();
+            } else {
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == 2) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Background location granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Background location denied. Geofencing will not work.", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }

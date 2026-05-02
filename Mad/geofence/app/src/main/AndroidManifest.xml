@@ -22,7 +22,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCasINdVk5LRXzvL4JmxRnbt9aJ56vC5F8"/>
+            android:value="API_KEY_INSERT_HERE"/>
 
         <receiver
             android:name=".GeofenceReceiver"

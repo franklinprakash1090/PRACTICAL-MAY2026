@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Support Ticket System</title>
+  <style>
+    body {
+      font-family: Arial;
+      background-color: #f4f6f9;
+      padding: 20px;
+    }
+    h1 { text-align: center; }
+    .container { width: 80%; margin: auto; }
+    .card {
+      background: white;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 8px 12px;
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover { background-color: #0b5ed7; }
+    .status-open     { color: red;    font-weight: bold; }
+    .status-progress { color: orange; font-weight: bold; }
+    .status-resolved { color: green;  font-weight: bold; }
+    .admin-row { display: flex; gap: 8px; margin-top: 8px; }
+    .admin-row input  { flex: 1; margin: 0; }
+    .admin-row button { white-space: nowrap; }
+    .admin-row select { flex: 0 0 160px; margin: 0; }
+  </style>
+</head>
+<body>
+
+<h1>Complaint / Support Ticket System</h1>
+<div class="container">
+
+  <!-- User Complaint Form -->
+  <div class="card">
+    <h2>Raise a Complaint</h2>
+    <input type="text"  id="name"        placeholder="Your Name"    required>
+    <input type="email" id="email"       placeholder="Your Email"   required>
+    <input type="text"  id="issueTitle"  placeholder="Issue Title"  required>
+    <textarea           id="description" placeholder="Describe your issue"></textarea>
+    <button onclick="submitTicket()">Submit Ticket</button>
+  </div>
+
+  <!-- Ticket Display -->
+  <div class="card">
+    <h2>Track Tickets</h2>
+    <div id="ticketList"></div>
+  </div>
+
+</div>
+
+<script>
+  let tickets = [];
+
+  function generateTicketID() {
+    return "TCKT" + Math.floor(Math.random() * 100000);
+  }
+
+  function submitTicket() {
+    let name  = document.getElementById("name").value.trim();
+    let email = document.getElementById("email").value.trim();
+    let title = document.getElementById("issueTitle").value.trim();
+    let desc  = document.getElementById("description").value.trim();
+
+    if (!name || !email || !title) {
+      alert("Please fill all required fields!");
+      return;
+    }
+
+    tickets.push({
+      id: generateTicketID(),
+      name, email, title,
+      description: desc,
+      status: "Open",
+      response: ""
+    });
+
+    displayTickets();
+    clearForm();
+  }
+
+  function displayTickets() {
+    let ticketList = document.getElementById("ticketList");
+    ticketList.innerHTML = "";
+
+    if (tickets.length === 0) {
+      ticketList.innerHTML = "<p>No tickets yet.</p>";
+      return;
+    }
+
+    tickets.forEach((ticket, index) => {
+      let statusClass = "";
+      if (ticket.status === "Open")        statusClass = "status-open";
+      if (ticket.status === "In Progress") statusClass = "status-progress";
+      if (ticket.status === "Resolved")    statusClass = "status-resolved";
+
+      let card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <p><strong>Ticket ID:</strong> ${ticket.id}</p>
+        <p><strong>Name:</strong> ${ticket.name}</p>
+        <p><strong>Email:</strong> ${ticket.email}</p>
+        <p><strong>Issue:</strong> ${ticket.title}</p>
+        <p><strong>Description:</strong> ${ticket.description || "—"}</p>
+        <p><strong>Status:</strong> <span class="${statusClass}">${ticket.status}</span></p>
+        <p><strong>Admin Response:</strong> ${ticket.response || "No response yet"}</p>
+        <div class="admin-row">
+          <select onchange="updateStatus(${index}, this.value)">
+            <option value="">Change Status</option>
+            <option value="Open"        ${ticket.status === "Open"        ? "selected" : ""}>Open</option>
+            <option value="In Progress" ${ticket.status === "In Progress" ? "selected" : ""}>In Progress</option>
+            <option value="Resolved"    ${ticket.status === "Resolved"    ? "selected" : ""}>Resolved</option>
+          </select>
+          <input type="text" id="resp-${index}" placeholder="Admin response" value="${ticket.response}">
+          <button onclick="addResponse(${index})">Send</button>
+        </div>
+      `;
+      ticketList.appendChild(card);
+    });
+  }
+
+  function updateStatus(index, newStatus) {
+    if (newStatus !== "") {
+      tickets[index].status = newStatus;
+      displayTickets();
+    }
+  }
+
+  function addResponse(index) {
+    let input = document.getElementById("resp-" + index);
+    tickets[index].response = input.value.trim();
+    displayTickets();
+  }
+
+  function clearForm() {
+    ["name", "email", "issueTitle", "description"].forEach(id => {
+      document.getElementById(id).value = "";
+    });
+  }
+</script>
+
+</body>
+</html>
